@@ -1,0 +1,3 @@
+[submodule "Llama-2-7B-Chat-GPTQ"]
+	path = Llama-2-7B-Chat-GPTQ
+	url = https://huggingface.co/TheBloke/Llama-2-7B-Chat-GPTQ
