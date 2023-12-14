@@ -16,11 +16,11 @@ class Predictor(BasePredictor):
     def setup(self) -> None:
         """Load the model into memory to make running multiple predictions efficient"""
         self.tokenizer = AutoTokenizer.from_pretrained(
-            MODEL_NAME, use_fast=True, cache_dir=MODEL_CACHE
+            MODEL_DEST, use_fast=True, cache_dir=MODEL_CACHE
         )
 
         model = AutoModelForCausalLM.from_pretrained(
-            MODEL_NAME, device_map="auto", trust_remote_code=False, revision="main"
+            MODEL_DEST, device_map="auto", trust_remote_code=False, revision="main"
         )
 
         # Pytorch 2 optimization
