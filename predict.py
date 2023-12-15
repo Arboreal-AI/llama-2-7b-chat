@@ -72,8 +72,8 @@ class Predictor(BasePredictor):
         """Run a single prediction on the model"""
         prompt_template = f"""[INST] <<SYS>>
         {system_prompt}
-        <</SYS>>
-        {prompt}[/INST]"""
+        <</SYS>> [/INST]
+        {prompt}"""
 
         input_ids = self.tokenizer(
             prompt_template, return_tensors="pt"
