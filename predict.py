@@ -29,7 +29,8 @@ class Predictor(BasePredictor):
     def predict(
         self,
         prompt: str = Input(
-            description="Prompt to send to Llama v2", default="Tell me about AI"
+            description="Prompt to send to Llama v2",
+            default="[INST]Tell me about AI[/INST]",
         ),
         system_prompt: str = Input(
             description="System prompt that helps guide system behavior",
