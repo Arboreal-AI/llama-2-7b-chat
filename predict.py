@@ -90,7 +90,7 @@ class Predictor(BasePredictor):
             ),
         )
         output = self.tokenizer.decode(outputs[0])
-        parts = output.split("[/INST]", 1)
-        final = parts[1]
+        parts = output.split("[/INST]")
+        final = parts[-1].strip()
 
         return final
