@@ -23,4 +23,4 @@ jobs:
 
       - name: Push to Replicate
         run: |
-          cog push --separate-weights r8.im/arboreal-ai/llama-2-7b-chat
+          cog push r8.im/arboreal-ai/llama-2-7b-chat --separate-weights
