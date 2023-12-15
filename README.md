@@ -1,7 +1,9 @@
 [![Push to Replicate](https://github.com/Arboreal-AI/llama-2-7b-chat/actions/workflows/main.yml/badge.svg)](https://github.com/Arboreal-AI/llama-2-7b-chat/actions/workflows/main.yml)
 
 # llama-2-7b-chat
-A cog wrapper for Llama-2-7b-Chat for deployment on Replicate and elsewhere
+A cog wrapper for Llama-2-7b-Chat
+
+Use it [on Replicate here](https://replicate.com/arboreal-ai/llama-2-7b-chat).
 
 This packaged model uses the mainline GPTQ quantization provided by [TheBloke/Llama-2-7B-Chat-GPTQ](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GPTQ) with the [HuggingFace Transformers library](https://huggingface.co/docs/transformers/index).
 
