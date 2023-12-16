@@ -89,6 +89,8 @@ class Predictor(BasePredictor):
                 exponential_decay_start,
                 exponential_decay_factor,
             ),
+            num_beams=4,
+            do_sample=True,
         )
         output = self.tokenizer.decode(outputs[0])
         parts = output.split("[/INST]")
