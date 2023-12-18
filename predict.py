@@ -91,7 +91,7 @@ class Predictor(BasePredictor):
             ),
             do_sample=True,
         )
-        output = self.tokenizer.decode(outputs[0])
+        output = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         parts = output.split("[/INST]")
         final = parts[-1].strip()
 
