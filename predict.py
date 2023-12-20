@@ -43,19 +43,19 @@ class Predictor(BasePredictor):
             description="Randomness of outputs, 0 is deterministic, greater than 1 is random",
             ge=0,
             le=5,
-            default=0.75,
+            default=1.0,
         ),
-        top_p: float = Input(
-            description="When decoding text, samples from the top p percentage of most likely tokens; lower to ignore less likely tokens",
-            ge=0.01,
-            le=1,
-            default=0.95,
+        eta_cutoff: float = Input(
+            description="Cutoff for eta sampling",
+            ge=0.0003,
+            le=0.004,
+            default=0.002,
         ),
         repetition_penalty: float = Input(
             description="Penalty for repeated words in generated text; 1 is no penalty, values greater than 1 discourage repetition, less than 1 encourage it",
             ge=0,
             le=5,
-            default=1.1,
+            default=1.0,
         ),
         exponential_decay_start: int = Input(
             description="Number of tokens to wait before starting exponential decay.",
@@ -82,7 +82,7 @@ class Predictor(BasePredictor):
         outputs = self.model.generate(
             inputs=input_ids,
             temperature=temperature,
-            top_p=top_p,
+            eta_cutoff=eta_cutoff,
             repetition_penalty=repetition_penalty,
             max_new_tokens=max_new_tokens,
             exponential_decay_length_penalty=(
