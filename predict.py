@@ -3,7 +3,7 @@
 
 from cog import BasePredictor, Input
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, TextIterator
 
 MODEL_NAME = "TheBloke/Llama-2-7B-Chat-GPTQ"
 MODEL_CACHE = "cache"
@@ -45,11 +45,11 @@ class Predictor(BasePredictor):
             le=5,
             default=1.0,
         ),
-        eta_cutoff: float = Input(
-            description="Cutoff for eta sampling",
-            ge=0.0003,
-            le=0.004,
-            default=0.002,
+        top_p: float = Input(
+            description="When decoding text, samples from the top p percentage of most likely tokens; lower to ignore less likely tokens",
+            ge=0.01,
+            le=1,
+            default=0.95,
         ),
         repetition_penalty: float = Input(
             description="Penalty for repeated words in generated text; 1 is no penalty, values greater than 1 discourage repetition, less than 1 encourage it",
@@ -69,6 +69,10 @@ class Predictor(BasePredictor):
             ge=1.0,
             le=10.0,
         ),
+        skip_prompt: bool = Input(
+            description="Whether to skip the prompt to .generate() or not. Useful e.g. for chatbots.",
+            default=True,
+        ),
     ) -> str:
         """Run a single prediction on the model"""
         prompt_template = f"""[INST] <<SYS>>
@@ -79,10 +83,17 @@ class Predictor(BasePredictor):
         input_ids = self.tokenizer(
             prompt_template, return_tensors="pt"
         ).input_ids.cuda()
-        outputs = self.model.generate(
+        streamer = TextIteratorStreamer(
+            self.tokenizer,
+            timeout=10.0,
+            skip_prompt=skip_prompt,
+            skip_special_tokens=True,
+        )
+        self.model.generate(
             inputs=input_ids,
+            streamer=streamer,
             temperature=temperature,
-            eta_cutoff=eta_cutoff,
+            top_p=top_p,
             repetition_penalty=repetition_penalty,
             max_new_tokens=max_new_tokens,
             exponential_decay_length_penalty=(
@@ -91,8 +102,4 @@ class Predictor(BasePredictor):
             ),
             do_sample=True,
         )
-        output = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        parts = output.split("[/INST]")
-        final = parts[-1].strip()
-
-        return final
+        return "".join([out for out in streamer])
