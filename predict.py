@@ -3,7 +3,7 @@
 
 from cog import BasePredictor, Input
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, TextIterator
+from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
 
 MODEL_NAME = "TheBloke/Llama-2-7B-Chat-GPTQ"
 MODEL_CACHE = "cache"
