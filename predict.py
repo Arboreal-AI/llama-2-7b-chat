@@ -3,7 +3,12 @@
 
 from cog import BasePredictor, Input
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    TextIteratorStreamer,
+    set_seed,
+)
 
 MODEL_NAME = "TheBloke/Llama-2-7B-Chat-GPTQ"
 MODEL_CACHE = "cache"
@@ -73,13 +78,18 @@ class Predictor(BasePredictor):
             description="Whether to skip the prompt to .generate() or not. Useful e.g. for chatbots.",
             default=True,
         ),
+        random_seed: int = Input(
+            description="Random seed for reproducibility. Set to 0 for no random seed.",
+            default=0,
+        ),
     ) -> str:
         """Run a single prediction on the model"""
         prompt_template = f"""[INST] <<SYS>>
         {system_prompt}
         <</SYS>> [/INST]
         {prompt}"""
-
+        if random_seed:
+            set_seed(random_seed)
         input_ids = self.tokenizer(
             prompt_template, return_tensors="pt"
         ).input_ids.cuda()
