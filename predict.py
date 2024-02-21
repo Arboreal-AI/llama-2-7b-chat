@@ -1,6 +1,10 @@
 # Prediction interface for Cog ⚙️
 # https://github.com/replicate/cog/blob/main/docs/python.md
 
+import contextlib
+import typing as tp
+import builtins
+
 from cog import BasePredictor, Input
 import torch
 from transformers import (
@@ -15,6 +19,28 @@ MODEL_CACHE = "cache"
 
 MODEL_DEST = "Llama-2-7B-Chat-GPTQ"
 TOKEN_DEST = "Llama-2-7B-Chat-GPTQ"
+
+
+@contextlib.contextmanager
+def delay_prints(
+    REALLY_EAT_MY_PRINT_STATEMENTS: bool = False,
+) -> tp.Iterator[tp.Callable]:
+    lines = []
+
+    def delayed_print(*args: tp.Any, **kwargs: tp.Any) -> None:
+        lines.append((args, kwargs))
+
+    if REALLY_EAT_MY_PRINT_STATEMENTS:
+        builtins.print, _print = delayed_print, builtins.print
+    try:
+        yield delayed_print
+    finally:
+        if REALLY_EAT_MY_PRINT_STATEMENTS:
+            builtins.print = _print
+        for args, kwargs in lines:
+            print(*args, **kwargs)
+
+    return delay_prints
 
 
 class Predictor(BasePredictor):
@@ -84,32 +110,34 @@ class Predictor(BasePredictor):
         ),
     ) -> str:
         """Run a single prediction on the model"""
-        prompt_template = f"""[INST] <<SYS>>
-        {system_prompt}
-        <</SYS>> [/INST]
-        {prompt}"""
-        if random_seed:
-            set_seed(random_seed)
-        input_ids = self.tokenizer(
-            prompt_template, return_tensors="pt"
-        ).input_ids.cuda()
-        streamer = TextIteratorStreamer(
-            self.tokenizer,
-            timeout=10.0,
-            skip_prompt=skip_prompt,
-            skip_special_tokens=True,
-        )
-        self.model.generate(
-            inputs=input_ids,
-            streamer=streamer,
-            temperature=temperature,
-            top_p=top_p,
-            repetition_penalty=repetition_penalty,
-            max_new_tokens=max_new_tokens,
-            exponential_decay_length_penalty=(
-                exponential_decay_start,
-                exponential_decay_factor,
-            ),
-            do_sample=True,
-        )
-        return "".join([out for out in streamer])
+        with delay_prints() as print:
+            complete_prompt = f"""[INST] <<SYS>>
+            {system_prompt}
+            <</SYS>> [/INST]
+            {prompt}"""
+            if random_seed:
+                set_seed(random_seed)
+            print(f"Your formatted prompt is: \n{complete_prompt}")
+            input_ids = self.tokenizer(
+                complete_prompt, return_tensors="pt"
+            ).input_ids.cuda()
+            streamer = TextIteratorStreamer(
+                self.tokenizer,
+                timeout=10.0,
+                skip_prompt=skip_prompt,
+                skip_special_tokens=True,
+            )
+            self.model.generate(
+                inputs=input_ids,
+                streamer=streamer,
+                temperature=temperature,
+                top_p=top_p,
+                repetition_penalty=repetition_penalty,
+                max_new_tokens=max_new_tokens,
+                exponential_decay_length_penalty=(
+                    exponential_decay_start,
+                    exponential_decay_factor,
+                ),
+                do_sample=True,
+            )
+            return "".join([out for out in streamer])
